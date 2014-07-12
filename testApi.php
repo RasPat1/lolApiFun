@@ -18,15 +18,29 @@ $urlParams = http_build_query($data);
 
 $url = $reqURL . $sName . "?" . $urlParams;
 
+$data = curl($url, $sName);
 
-// Remember when getting serious to try to use multi curl
-// http://www.phpied.com/simultaneuos-http-requests-in-php-with-curl/
-$ch = curl_init($url);
-$fp = fopen("summoner_" . $sName, "w");
 
-curl_setopt($ch, CURLOPT_FILE, $fp);
-curl_setopt($ch, CURLOPT_HEADER, 0);
+function curl($url, $fileName = "") {
+	if (empty($fileName)) {
+		$fileName = date('m-d-y_H:m:s');
+	}
+	// Remember when getting serious to try to use multi curl
+	// http://www.phpied.com/simultaneuos-http-requests-in-php-with-curl/
+	$ch = curl_init($url);
 
-curl_exec($ch);
-curl_close($ch);
-fclose($fp);
+	// For now savbe thsi data into a file
+	// Once caching later is implemented save this to Cache
+	$fp = fopen($fileName . ".data", "w");
+	
+	curl_setopt($ch, CURLOPT_HEADER, 0);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+	$output = curl_exec($ch);
+	curl_close($ch);
+
+	fwrite($fp, $output);
+	fclose($fp);
+
+	return $output;
+}
